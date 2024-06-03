@@ -8,6 +8,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:new_wave_test/logic/geolocatorUtil.dart';
 import 'package:new_wave_test/logic/mapUtil.dart';
+import 'package:substring_highlight/substring_highlight.dart';
+
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -111,7 +113,14 @@ class _SearchScreenState extends State<SearchScreen> {
               child: ListView.builder(
                 itemCount: lsItem.length,
                 itemBuilder: (context, index) => ListTile(
-                  title: Text(lsItem[index]['title']),
+                  // title: Text(lsItem[index]['title']),
+                  title: SubstringHighlight(
+                    text: lsItem[index]['title'],
+                    term: searchController.text,
+                    textStyleHighlight: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   onTap: () {
                     final lat = lsItem[index]['position']['lat'];
                     final lng = lsItem[index]['position']['lng'];
