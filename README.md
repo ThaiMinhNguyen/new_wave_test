@@ -1,2 +1,2 @@
-<video src="https://github.com/ThaiMinhNguyen/new_wave_test/blob/main/vids/new_wave_test.mp4" width="300" />
-<video src="https://github.com/ThaiMinhNguyen/new_wave_test/blob/main/vids/new_wave_test.mp4"></video>
+https://github.com/ThaiMinhNguyen/new_wave_test/assets/85737176/8bafe940-764f-4a86-86f9-5f503f2498e4
+
