@@ -120,6 +120,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     print(lat);
                     MapUtils.openMap(des, des_id, lat, lng);
                   },
+                  trailing: Icon(Icons.directions),
                 ),
               ),
             )
