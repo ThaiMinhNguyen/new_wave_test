@@ -3,9 +3,11 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:new_wave_test/logic/geolocatorUtil.dart';
+import 'package:new_wave_test/logic/mapUtil.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -21,6 +23,7 @@ class _SearchScreenState extends State<SearchScreen> {
   late Position position;
   bool searchCheck = false;
   String searchText = '';
+  var lsItem = [];
 
   @override
   void initState() {
@@ -56,42 +59,71 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Container(
-            child: Column(
-              children: [
-                // SizedBox(height: 20,),
-                Container(
-                  margin: EdgeInsets.all(15),
-                  child: SearchBar(
-                    controller: searchController,
-                    leading: Icon(Icons.search),
-                    hintText: 'Enter keyword',
-                    trailing: [
-                      Visibility(
-                        visible: searchCheck,
-                        child: IconButton(
-                            onPressed: (){
-                                searchController.clear();
-                                // print(position.longitude);
-                            },
-                            icon: Icon(Icons.clear)),
-                        replacement: SizedBox(),
-                      ),
-                    ],
-                    onChanged: (value) async {
-                      await Future.delayed(Duration(seconds: 1));
-                      final latitude = position.latitude;
-                      final longitude = position.longitude;
-                      print(latitude);
-                      print(longitude);
-                      final url = Uri.parse('https://geocode.search.hereapi.com/v1/autosuggest?q=$value&at=$latitude,$longitude&limit=2&lang=vi&apiKey=$apiKey');
-                      final response = await http.get(url);
-                      // print(response.body);
-                    },
+        child: Column(
+          children: [
+            Container(
+              margin: EdgeInsets.all(15),
+              child: SearchBar(
+                controller: searchController,
+                leading: Icon(Icons.search),
+                hintText: 'Enter keyword',
+                trailing: [
+                  Visibility(
+                    visible: searchCheck,
+                    child: IconButton(
+                        onPressed: (){
+                            searchController.clear();
+                            // print(position.longitude);
+                        },
+                        icon: Icon(Icons.clear)),
+                    replacement: SizedBox(),
                   ),
-                )
-              ],
+                ],
+                onChanged: (value) async {
+                  final latitude = position.latitude;
+                  final longitude = position.longitude;
+                  // print(latitude);
+                  // print(longitude);
+                  if(searchController.text.isEmpty){
+                    setState(() {
+                      lsItem = [];
+                    });
+                  } else {
+                    final url = Uri.parse(
+                        'https://geocode.search.hereapi.com/v1/autosuggest?q=$value&at=$latitude,$longitude&limit=10&lang=vi&apiKey=$apiKey');
+                    final response = await http.get(url);
+                    // print(jsonDecode(utf8.decode(response.bodyBytes))); // lấy có dấu theo utf8
+                    final ls = jsonDecode(utf8.decode(response.bodyBytes))['items'] as List;
+                    setState(() {
+                      lsItem = ls;
+                    });
+                    // print(lsItem);
+                    if (searchController.text.isEmpty) {
+                      setState(() {
+                        lsItem = [];
+                      });
+                    }
+                  }
+                },
+              ),
             ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: lsItem.length,
+                itemBuilder: (context, index) => ListTile(
+                  title: Text(lsItem[index]['title']),
+                  onTap: () {
+                    final lat = lsItem[index]['position']['lat'];
+                    final lng = lsItem[index]['position']['lng'];
+                    final des = lsItem[index]['address']['label'];
+                    final des_id = lsItem[index]['id'];
+                    print(lat);
+                    MapUtils.openMap(des, des_id, lat, lng);
+                  },
+                ),
+              ),
+            )
+          ],
         ),
       ),
     );
